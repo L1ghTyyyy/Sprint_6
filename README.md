@@ -26,15 +26,17 @@
 - WebDriver для браузера
 
 ## Структура проекта
+```
 project/
-├── tests/                 # Тесты
-├── pages/                 # PageObject-классы
-├── helpers/               # Вспомогательные функции и данные
-├── conftest.py            # Pytest фикстуры
-├── requirements.txt       # Зависимости
-├── allure_results/        # Raw-результаты (игнорируются в .gitignore)
-├── allure_report/         # Сгенерированный HTML-отчёт (временно добавлен)
-└── README.md
+├── tests/                  # Тесты
+├── pages/                  # PageObject-классы
+├── helpers/                # Вспомогательные функции и данные
+├── conftest.py             # Pytest фикстуры
+├── requirements.txt        # Зависимости
+├── allure_results/         # Raw-результаты (в .gitignore)
+├── allure_report/          # Сгенерированный HTML-отчёт (временно добавлен)
+└── README.md               # Документация проекта
+```
 
 ## Установка
 
