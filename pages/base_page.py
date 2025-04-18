@@ -1,59 +1,64 @@
+import allure
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-
 class BasePage:
-
     def __init__(self, driver):
         self.driver = driver
-        self.wait = WebDriverWait(self.driver, 10)
+        self.base_url = ""
 
-    def find_element(self, locator):
-        """Метод для поиска элемента на странице"""
-        return self.driver.find_element(*locator)
+    def get_page(self, url: str):
+        self.driver.get(url)
 
-    def find_elements(self, locator):
-        """Метод для поиска множества элементов"""
-        return self.driver.find_elements(*locator)
+    def wait_for_element_to_be_visible(self, locator, timeout: int = 10):
+        return WebDriverWait(self.driver, timeout).until(
+            EC.visibility_of_element_located(locator)
+        )
+
+    def wait_for_element_to_be_clickable(self, locator, timeout: int = 10):
+        return WebDriverWait(self.driver, timeout).until(
+            EC.element_to_be_clickable(locator)
+        )
 
     def click_on(self, locator):
-        """Метод для клика по элементу"""
-        _element = self.find_element(locator)
-        _element.click()
+        element = self.wait_for_element_to_be_clickable(locator)
+        element.click()
 
-    def send_keys(self, locator, text):
-        """Метод для ввода текста в поле"""
-        _element = self.find_element(locator)
-        _element.clear()  # Очищаем поле перед вводом
-        _element.send_keys(text)
-
-    def wait_for_page(self, url):
-        """Метод ожидания появления страницы"""
-        return self.wait.until(EC.url_to_be(url))
-
-    def wait_for_element(self, locator):
-        """Метод ожидания появления элемента на странице"""
-        return self.wait.until(EC.presence_of_element_located(locator))
-
-    def wait_for_element_to_be_clickable(self, locator):
-        """Метод ожидания, чтобы элемент стал кликабельным"""
-        return self.wait.until(EC.element_to_be_clickable(locator))
-
-    def wait_for_element_to_be_visible(self, locator):
-        """Метод ожидания видимости элемента"""
-        return self.wait.until(EC.visibility_of_element_located(locator))
-
-    def scroll_to_element(self, element):
-        """Метод прокрутки страницы до элемента"""
-        self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
-        return self.wait.until(EC.visibility_of(element))
+    def send_keys(self, locator, text: str):
+        element = self.wait_for_element_to_be_visible(locator)
+        element.clear()
+        element.send_keys(text)
 
     def scroll_to(self, locator):
-        """Метод прокрутки страницы до элемента"""
-        _element = self.find_element(locator)
-        return self.scroll_to_element(_element)
+        element = self.wait_for_element_to_be_visible(locator)
+        self.driver.execute_script("arguments[0].scrollIntoView();", element)
+        return locator
 
-    def get_page(self, url):
-        """Метод вызова и ожидания загрузки страницы"""
-        self.driver.get(url)
-        self.wait_for_page(url)
+    def scroll_to_element(self, element):
+        self.driver.execute_script("arguments[0].scrollIntoView();", element)
+
+    def find_element(self, locator):
+        return self.wait_for_element_to_be_visible(locator)
+
+    def find_elements(self, locator):
+        return self.driver.find_elements(*locator)
+
+    def wait_for_page(self, url_contains: str, timeout: int = 10):
+        WebDriverWait(self.driver, timeout).until(
+            EC.url_contains(url_contains)
+        )
+
+    @allure.step("Переключиться на новую вкладку с URL, содержащим «{partial_url}»")
+    def switch_to_new_window_with_url_contains(self, partial_url: str, timeout: int = 10):
+        original = self.driver.current_window_handle
+        WebDriverWait(self.driver, timeout).until(
+            EC.number_of_windows_to_be(2)
+        )
+        new_window = [w for w in self.driver.window_handles if w != original][0]
+        self.driver.switch_to.window(new_window)
+        WebDriverWait(self.driver, timeout).until(
+            EC.url_contains(partial_url)
+        )
+
+    def get_current_url(self):
+        return self.driver.current_url

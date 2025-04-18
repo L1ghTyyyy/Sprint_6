@@ -13,29 +13,26 @@ def driver():
 
 
 @pytest.fixture
-def get_main_page(driver):
+def main_page(driver):
     """Фикстура для стартовой страницы"""
-    main_page = MainPage(driver)
-    main_page.get_main_page()
-
-    return main_page
+    page = MainPage(driver)
+    page.get_main_page()
+    return page
 
 
 @pytest.fixture
-def get_order_page(driver):
+def order_page(driver):
     """Фикстура для страницы заказа"""
-    order_page = OrderPage(driver)
-    order_page.get_order_page()
-
-    return order_page
+    page = OrderPage(driver)
+    page.get_order_page()
+    return page
 
 
 @pytest.fixture
-def complete_order(get_order_page):
+def completed_order(order_page):
     """Фикстура для совершения заказа"""
-    order_page = get_order_page
+    page = order_page
     order_data = generate_order_data()
-    order_page.set_order_information(order_data)
-    order_page.submit_order()
-
-    return order_page
+    page.set_order_information(order_data)
+    page.submit_order()
+    return page

@@ -1,138 +1,120 @@
-from selenium.webdriver.support import expected_conditions as EC
-
-from selenium.webdriver.common.by import By
-import random
 import allure
-from datetime import date
-
-from selenium.webdriver.support.wait import WebDriverWait
-
+import random
+from locators.order_page_locators import (
+    NAME_INPUT_LOCATOR,
+    SURNAME_INPUT_LOCATOR,
+    ADDRESS_INPUT_LOCATOR,
+    METRO_FIELD_LOCATOR,
+    METRO_OPTIONS_LOCATOR,
+    PHONE_INPUT_LOCATOR,
+    NEXT_BUTTON_LOCATOR,
+    DELIVERY_DATE_LOCATOR,
+    RENTAL_PERIOD_LOCATOR,
+    RENTAL_OPTIONS_LOCATOR,
+    COLOR_LOCATOR,
+    COMMENT_INPUT_LOCATOR,
+    ORDER_BUTTON_LOCATOR,
+    CONFIRM_BUTTON_LOCATOR,
+    SUCCESS_MESSAGE_LOCATOR,
+    VIEW_STATUS_BUTTON_LOCATOR,
+    LOOK_BUTTON_LOCATOR,
+    LOGO_SCOOTER,
+    LOGO_YANDEX,
+    get_date_locator,
+)
 from helpers import URLs
-from locators import OrderPageLocators
 from .base_page import BasePage
 
 
 class OrderPage(BasePage):
+    """Page Object для страницы заказа самоката"""
 
-    @allure.step("Переход на страницу для заказа")
+    @allure.step("Открыть страницу заказа")
     def get_order_page(self):
-        """Функция для перехода на страницу для заказа"""
         self.get_page(URLs.ORDER_PAGE)
 
     @allure.step("Заполнение первой страницы формы заказа")
-    def fill_first_order_form(self, name, surname, address, phone):
-        """Функция для заполнения первой страницы заказа"""
-        self.send_keys(OrderPageLocators.NAME_INPUT_LOCATOR, name)
-        self.send_keys(OrderPageLocators.SURNAME_INPUT_LOCATOR, surname)
-        self.send_keys(OrderPageLocators.ADDRESS_INPUT_LOCATOR, address)
+    def fill_first_order_form(self, name: str, surname: str, address: str, phone: str):
+        self.send_keys(NAME_INPUT_LOCATOR, name)
+        self.send_keys(SURNAME_INPUT_LOCATOR, surname)
+        self.send_keys(ADDRESS_INPUT_LOCATOR, address)
         self.select_random_metro_station()
-        self.send_keys(OrderPageLocators.PHONE_INPUT_LOCATOR, phone)
+        self.send_keys(PHONE_INPUT_LOCATOR, phone)
 
+    @allure.step("Случайный выбор станции метро")
     def select_random_metro_station(self):
-        """Функция для случайного выбора станции метро"""
-        self.click_on(OrderPageLocators.METRO_FIELD_LOCATOR)
-        self.wait_for_element_to_be_visible(OrderPageLocators.METRO_FIELD_LOCATOR)
-        metro_options = self.find_elements(OrderPageLocators.METRO_OPTIONS_LOCATOR)
-        # Случайный выбор станции
-        random_station = random.choice(metro_options)
-        self.scroll_to_element(random_station)
-        random_station.click()
-        station_name = self.find_element(OrderPageLocators.METRO_FIELD_LOCATOR).get_attribute("value")
-        # Прикрепляем название станции в отчет
-        allure.attach(station_name, name="station")
+        self.click_on(METRO_FIELD_LOCATOR)
+        self.wait_for_element_to_be_visible(METRO_OPTIONS_LOCATOR)
+        options = self.find_elements(METRO_OPTIONS_LOCATOR)
+        station = random.choice(options)
+        self.scroll_to_element(station)
+        station.click()
 
-    @allure.step("Переход на следующую страницу формы заказа")
+    @allure.step("Перейти к следующему шагу заказа")
     def click_next_page(self):
-        """Функция для перехода на вторую страницу оформления заказа"""
-        self.click_on(OrderPageLocators.NEXT_BUTTON_LOCATOR)
+        self.click_on(NEXT_BUTTON_LOCATOR)
 
     @allure.step("Заполнение второй страницы формы заказа")
-    def fill_second_order_form(self, delivery_date, comment):
-        """Функция для заполнения второй страницы заказа"""
+    def fill_second_order_form(self, delivery_date: str, comment: str):
         self.set_delivery_date(delivery_date)
         self.select_rental_period()
         self.select_scooter_color()
-        self.send_keys(OrderPageLocators.COMMENT_INPUT_LOCATOR, comment)
+        self.send_keys(COMMENT_INPUT_LOCATOR, comment)
 
-    def set_delivery_date(self, delivery_date):
-        """Функция для выбора даты заказа"""
-        # Клик по полю даты, чтобы открыть календарь
-        self.click_on(OrderPageLocators.DELIVERY_DATE_LOCATOR)
-        self.send_keys(OrderPageLocators.DELIVERY_DATE_LOCATOR, delivery_date)
-        # Динамический локатор для выбора нужной даты
-        date_to_select = (
-            By.XPATH,
-            f"//div[contains(@class, 'react-datepicker__day') and text()='{int(delivery_date.split('.')[0])}']")
-        self.click_on(date_to_select)
+    @allure.step("Установка даты доставки: {delivery_date}")
+    def set_delivery_date(self, delivery_date: str):
+        self.click_on(DELIVERY_DATE_LOCATOR)
+        self.send_keys(DELIVERY_DATE_LOCATOR, delivery_date)
+        locator = get_date_locator(int(delivery_date.split('.')[0]))
+        self.click_on(locator)
 
+    @allure.step("Случайный выбор срока аренды")
     def select_rental_period(self):
-        """Функция для случайного выбора периода аренды"""
-        self.click_on(OrderPageLocators.RENTAL_PERIOD_LOCATOR)
-        rental_options = self.find_elements(OrderPageLocators.RENTAL_OPTIONS_LOCATOR)
-        # Случайный выбор периода аренды
-        random_rental_period = random.choice(rental_options)
-        self.scroll_to_element(random_rental_period)
-        random_rental_period.click()
-        rental_period = self.find_element(OrderPageLocators.RENTAL_PERIOD_LOCATOR).text
-        # Прикрепляем период аренды в отчет
-        allure.attach(rental_period, name="rental_period")
+        self.click_on(RENTAL_PERIOD_LOCATOR)
+        options = self.find_elements(RENTAL_OPTIONS_LOCATOR)
+        period = random.choice(options)
+        self.scroll_to_element(period)
+        period.click()
 
+    @allure.step("Случайный выбор цвета самоката")
     def select_scooter_color(self):
-        """Функция для случайного выбора цвета самоката"""
-        color_options = self.find_elements(OrderPageLocators.COLOR_LOCATOR)
-        random_color = random.choice(color_options)
-        random_color.click()
+        colors = self.find_elements(COLOR_LOCATOR)
+        random.choice(colors).click()
 
-    @allure.step("Заполнение полей заказа")
-    def set_order_information(self, order_data):
-        """Функция для заполнения информации для заказа"""
-        name = order_data.get('name', 'Не указано')
-        surname = order_data.get('surname', 'Не указано')
-        address = order_data.get('address', 'Не указан')
-        phone = order_data.get('phone', 'Не указан')
-        delivery_date = order_data.get('delivery_date', date.today().strftime("%d.%m.%Y"))
+    @allure.step("Заполнить всю форму заказа")
+    def set_order_information(self, order_data: dict):
+        name = order_data.get('name', '')
+        surname = order_data.get('surname', '')
+        address = order_data.get('address', '')
+        phone = order_data.get('phone', '')
+        delivery_date = order_data.get('delivery_date', '')
         comment = order_data.get('comment', '')
-
         self.fill_first_order_form(name, surname, address, phone)
         self.click_next_page()
         self.fill_second_order_form(delivery_date, comment)
 
     @allure.step("Подтверждение заказа")
     def submit_order(self):
-        """Функция для подтверждения заказа"""
-        self.click_on(OrderPageLocators.ORDER_BUTTON_LOCATOR)
-        self.click_on(OrderPageLocators.CONFIRM_BUTTON_LOCATOR)
+        self.click_on(ORDER_BUTTON_LOCATOR)
+        self.click_on(CONFIRM_BUTTON_LOCATOR)
 
-    @staticmethod
-    def get_order_number(text):
-        """Функция для извлечения номера заказа"""
-        parts = text.split(":")
-        if len(parts) > 1:
-            return parts[1].strip().split(".")[0]
-        else:
-            return None
+    @allure.step("Получение сообщения об успешном заказе")
+    def get_success_message(self) -> tuple[str, str]:
+        text = self.find_element(SUCCESS_MESSAGE_LOCATOR).text
+        number = text.split(":")[1].split(".")[0].strip()
+        return text, number
 
-    @allure.step("Сообщение о статусе заказа")
-    def get_success_message(self):
-        """Функция для извлечения сообщения о статусе заказа"""
-        order_info = self.find_element(OrderPageLocators.SUCCESS_MESSAGE_LOCATOR).text
-        return order_info, self.get_order_number(order_info)
-
-    @allure.step("Клик на «Посмотреть статус»")
+    @allure.step("Просмотр статуса заказа")
     def click_on_view_status(self):
-        """Функция для клика по «Посмотреть статус»"""
-        self.click_on(OrderPageLocators.VIEW_STATUS_BUTTON_LOCATOR)
-        self.wait_for_element_to_be_visible(OrderPageLocators.LOOK_BUTTON_LOCATOR)
+        self.click_on(VIEW_STATUS_BUTTON_LOCATOR)
+        self.wait_for_element_to_be_visible(LOOK_BUTTON_LOCATOR)
 
-    @allure.step("Клик на логотип «Самокат»")
+    @allure.step("Клик по логотипу Самоката и возврат на главную")
     def click_on_logo_samokat(self):
-        """Функция для клика по логотипу «Самокат»"""
-        self.click_on(OrderPageLocators.LOGO_SCOOTER)
+        self.click_on(LOGO_SCOOTER)
         self.wait_for_page(URLs.BASE_URL)
 
-    @allure.step("Клик на логотип «Яндекс»")
+    @allure.step("Клик по логотипу Яндекса и открытие Дзена")
     def click_on_logo_yandex(self):
-        """Функция для клика по логотипу «Яндекс»"""
-        self.click_on(OrderPageLocators.LOGO_YANDEX)
-        self.driver.switch_to.window(self.driver.window_handles[-1])  # Безопасный переход на новую вкладку
-        WebDriverWait(self.driver, 10).until(EC.url_contains("dzen.ru"))
+        self.click_on(LOGO_YANDEX)
+        self.switch_to_new_window_with_url_contains("dzen.ru")

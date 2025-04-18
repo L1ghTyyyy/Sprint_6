@@ -1,3 +1,25 @@
-from .order_page_locators import OrderPageLocators
+# Package for locators
 
-__all__ = ["OrderPageLocators"]
+from .faq_page_locators import question_locator, answer_locator
+from .order_page_locators import (
+    NAME_INPUT_LOCATOR,
+    SURNAME_INPUT_LOCATOR,
+    ADDRESS_INPUT_LOCATOR,
+    METRO_FIELD_LOCATOR,
+    METRO_OPTIONS_LOCATOR,
+    PHONE_INPUT_LOCATOR,
+    NEXT_BUTTON_LOCATOR,
+    DELIVERY_DATE_LOCATOR,
+    RENTAL_PERIOD_LOCATOR,
+    RENTAL_OPTIONS_LOCATOR,
+    COLOR_LOCATOR,
+    COMMENT_INPUT_LOCATOR,
+    ORDER_BUTTON_LOCATOR,
+    CONFIRM_BUTTON_LOCATOR,
+    SUCCESS_MESSAGE_LOCATOR,
+    VIEW_STATUS_BUTTON_LOCATOR,
+    LOOK_BUTTON_LOCATOR,
+    LOGO_SCOOTER,
+    LOGO_YANDEX,
+    get_date_locator
+)
